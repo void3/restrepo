@@ -1,4 +1,11 @@
+#include <stdio.h>
 #include <stdlib.h>
+
+#ifdef DEBUG
+#define LOGFUNC() printf("%s(File %s Line %d):", __func__, __FILE__, __LINE__)
+#else
+#define LOGFUNC()
+#endif
 
 typedef struct myobj {
   int state; /* state */
@@ -8,6 +15,8 @@ myobj_t* myobj_create(void)
 {
   myobj_t *objp;
 
+  LOGFUNC();
+
   objp = (myobj_t *)malloc(sizeof(myobj_t));
   objp->state = 0;
 
@@ -16,12 +25,16 @@ myobj_t* myobj_create(void)
 
 void myobj_destroy(myobj_t *objp)
 {
+  LOGFUNC();
+
   free(objp);
 }
 
 void myobj_in(myobj_t *objp, int in)
 {
   int oldstate;
+
+  LOGFUNC();
 
   switch (objp->state) {
     case 0:
@@ -46,6 +59,8 @@ int main()
 {
   myobj_t *obj1p;
   int i, ret;
+
+  LOGFUNC();
 
   obj1p = myobj_create();
   if (!obj1p) {
