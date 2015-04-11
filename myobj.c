@@ -9,17 +9,46 @@
 #define LOGFUNC()
 #endif
 
+typedef struct myobj {
+	void *handle; /* handle for mach* */
+	int  type;    /* machine type */
+} myobj_t;
+
+/*
+ * type を myobj_t メンバにセットする
+ *
+ * IN myobjp
+ * IN type
+ * 
+ * 戻り値 0 or -1
+ */
+int gen_set_type(myobj_t *myobjp, int type)
+ {
+  int ret = 0;
+
+  switch (type) {
+	case 1: case 2:
+      myobjp->type = type;
+      break;
+    default:
+      printf("type = %d\n", type);
+      perror("invalid type");
+    ret = -1;
+  }
+  return ret;
+}
+
 /*
  * type に従って、オブジェクトを生成する
  *
- * IN  int    type
- * OUT void * handle
+ * IN  myobj_t *myobjp
  */
-void *gen_create(int type)
+int gen_create(myobj_t *myobjp)
 {
   void *handle;
+  int ret = 0;
 
-  switch(type) {
+  switch(myobjp->type) {
 	case 1:
 	  handle = (void *)mach1_create();
 	  break;
@@ -29,31 +58,35 @@ void *gen_create(int type)
 	default:
 	  perror("gen_create: invalid machine type");
       handle = NULL;
+      ret = -1;
   }
-  return handle;
+
+  myobjp->handle = handle;
+
+  return ret;
 }
 
 /*
  * type に従って、オブジェクトを破壊する
  *
- * IN  int    type
- * IN  void * handle
+ * IN  myobj_t *myobjp
  */
-void *gen_destroy(int type, void *handle)
+int gen_destroy(myobj_t *myobjp)
 {
+  int ret = 0;
 
-  switch(type) {
+  switch(myobjp->type) {
 	case 1:
-	  mach1_destroy((mach1_t *)handle);
+	  mach1_destroy((mach1_t *)myobjp->handle);
 	  break;
 	case 2:
-	  mach2_destroy((mach2_t *)handle);
+	  mach2_destroy((mach2_t *)myobjp->handle);
 	  break;
 	default:
 	  perror("gen_destroy: invalid machine type");
-      handle = NULL;
+      myobjp->handle = NULL;
   }
-  return;
+  return ret;
 }
 
 /*
@@ -63,21 +96,22 @@ void *gen_destroy(int type, void *handle)
  * IN  void * handle
  * IN  int    in
  */
-void *gen_in(int type, void *handle, int in)
+int gen_in(myobj_t *myobjp, int in)
 {
+  int ret = 0;
 
-  switch(type) {
+  switch(myobjp->type) {
 	case 1:
-	  mach1_in((mach1_t *)handle, in);
+	  mach1_in((mach1_t *)myobjp->handle, in);
 	  break;
 	case 2:
-	  mach2_in((mach2_t *)handle, in);
+	  mach2_in((mach2_t *)myobjp->handle, in);
 	  break;
 	default:
 	  perror("gen_in: invalid machine type");
-      handle = NULL;
+      ret = -1;
   }
-  return handle;
+  return ret;
 }
 
 /*
@@ -87,14 +121,19 @@ void *gen_in(int type, void *handle, int in)
  */
 int main()
 {
-  void *handle[2];
+  myobj_t myobj[2];
+
   int i, j;
 
   LOGFUNC();
 
+  /* myobj[0] is mach2, myobj[1] is mach1 */
+  gen_set_type(&myobj[0], 2);
+  gen_set_type(&myobj[1], 1);
+
   for (j = 0; j < 2; j++) {
-	handle[j] = gen_create(j+1);
-    if (!handle[j]) {
+	gen_create(&myobj[j]);
+    if (!myobj[j].handle) {
       perror("create error for machine");
 	}
   }
@@ -102,13 +141,13 @@ int main()
   for (i = 0; i < 10; i++) { /* left */
     printf("%d:", i);
     for (j = 0; j < 2; j++) {
-      gen_in(j+1, handle[j], 0);
+      gen_in(&myobj[j], 0);
 	}
     printf("\n");
   }
 
   for (j = 0; j < 2; j++) {
-	gen_destroy(j+1, handle[j]);
+	gen_destroy(&myobj[j]);
   }
 
   return 0;
