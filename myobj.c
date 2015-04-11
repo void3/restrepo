@@ -1,83 +1,115 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "machine.h"
+
 #ifdef DEBUG
 #define LOGFUNC() printf("%s(File %s Line %d):", __func__, __FILE__, __LINE__)
 #else
 #define LOGFUNC()
 #endif
 
-typedef struct myobj {
-  int state; /* state */
-} myobj_t;
-
-myobj_t* myobj_create(void)
+/*
+ * type に従って、オブジェクトを生成する
+ *
+ * IN  int    type
+ * OUT void * handle
+ */
+void *gen_create(int type)
 {
-  myobj_t *objp;
+  void *handle;
 
-  LOGFUNC();
-
-  objp = (myobj_t *)malloc(sizeof(myobj_t));
-  objp->state = 0;
-
-  return objp;
-}
-
-void myobj_destroy(myobj_t *objp)
-{
-  LOGFUNC();
-
-  free(objp);
-}
-
-void myobj_in(myobj_t *objp, int in)
-{
-  int oldstate;
-
-  LOGFUNC();
-
-  switch (objp->state) {
-    case 0:
-      objp->state = 1;
-      break;
-    case 1:
-      if(in == 0) { objp->state = 2; } else { objp->state = 3; }
-      break;
-    case 2:
-      if(in == 0) { objp->state = 3; } else { objp->state = 1; }
-      break;
-    case 3:
-      if(in == 0) { objp->state = 1; } else { objp->state = 2; }
-      break;
-    default:
-      perror("myobj_in: illigal state");
+  switch(type) {
+	case 1:
+	  handle = (void *)mach1_create();
+	  break;
+	case 2:
+	  handle = (void *)mach2_create();
+	  break;
+	default:
+	  perror("gen_create: invalid machine type");
+      handle = NULL;
   }
-  printf("new state = %d\n", objp->state);
+  return handle;
 }
 
+/*
+ * type に従って、オブジェクトを破壊する
+ *
+ * IN  int    type
+ * IN  void * handle
+ */
+void *gen_destroy(int type, void *handle)
+{
+
+  switch(type) {
+	case 1:
+	  mach1_destroy((mach1_t *)handle);
+	  break;
+	case 2:
+	  mach2_destroy((mach2_t *)handle);
+	  break;
+	default:
+	  perror("gen_destroy: invalid machine type");
+      handle = NULL;
+  }
+  return;
+}
+
+/*
+ * type に従って、オブジェクトにインプットする
+ *
+ * IN  int    type
+ * IN  void * handle
+ * IN  int    in
+ */
+void *gen_in(int type, void *handle, int in)
+{
+
+  switch(type) {
+	case 1:
+	  mach1_in((mach1_t *)handle, in);
+	  break;
+	case 2:
+	  mach2_in((mach2_t *)handle, in);
+	  break;
+	default:
+	  perror("gen_in: invalid machine type");
+      handle = NULL;
+  }
+  return handle;
+}
+
+/*
+ * type 1, type 2 のオブジェクトを作成し、
+ * 10回0をインプットしたのち、
+ * オブジェクトを破壊する
+ */
 int main()
 {
-  myobj_t *obj1p;
-  int i, ret;
+  void *handle[2];
+  int i, j;
 
   LOGFUNC();
 
-  obj1p = myobj_create();
-  if (!obj1p) {
-    perror("create error");
+  for (j = 0; j < 2; j++) {
+	handle[j] = gen_create(j+1);
+    if (!handle[j]) {
+      perror("create error for machine");
+	}
   }
 
   for (i = 0; i < 10; i++) { /* left */
     printf("%d:", i);
-    myobj_in(obj1p, 0);
+    for (j = 0; j < 2; j++) {
+      gen_in(j+1, handle[j], 0);
+	}
+    printf("\n");
   }
 
-  for (i = 0; i < 10; i++) { /* right */
-    printf("%d:", i);
-    myobj_in(obj1p, 1);
+  for (j = 0; j < 2; j++) {
+	gen_destroy(j+1, handle[j]);
   }
-
-  myobj_destroy(obj1p);
 
   return 0;
 }
