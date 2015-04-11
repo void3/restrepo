@@ -49,6 +49,14 @@ int list_delete(list_t *head, list_t *elem)
       return 1;	  
     }
   }
+  
+  if (p->next == NULL && p == elem) {
+        printf("removing tail element\n");
+        printf("removing %d->%d->NULL\n", prev->member, elem->member);
+        prev->next = p->next;
+        return 1;
+  }
+  
   printf("not found\n");
   return -1;
 }
@@ -75,9 +83,9 @@ int main()
     list_show(&head);
     c.member=3; c.next=NULL;list_insert(&head, &c);
     list_show(&head);
-    list_delete(&head, &b);
-    list_show(&head);
     list_delete(&head, &a);
+    list_show(&head);
+    list_delete(&head, &c);
     list_show(&head);
     
     return 0;
