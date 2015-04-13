@@ -60,12 +60,13 @@ void list_show(elem_t *list)
 	int i;
 
   LOGFUNC();
+  printf("show:");
   for (i = 0; i < ELEM_MAX && list[i].member != NULL; i++) {
       printf("(%d)", i);
       printf("(%p)", list[i]);
       if (list[i].member != NULL) printf("%c ", *(list[i].member));
 	}
-  printf("end");
+  printf("\n");
 }
 
 int main()
@@ -74,19 +75,19 @@ int main()
 	char c[ELEM_MAX] = { 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j' }; 
     int i;
 
-// DEBUG
     for (i = 0; i < ELEM_MAX; i++) {
-		array[i].member = &c[i];
-        printf("%p %c&%p %c", array[i].member, *array[i].member, &c[i], c[i]);
+		array[i].member = NULL;
+		array[i].number = i;
 	}
-    printf("array=%p array[0]=%p array[0].member=%p\n", array, &array[0], array[0].member);
 
-    list_delete(&array, &c[1]);
-    list_show(&array);
-    list_delete(&array, &c[0]);
-    list_show(&array);
-    list_insert(&array, &c[1]);
-    list_show(&array);
+    list_insert(array, &c[1]);
+    list_show(array);
+    list_insert(array, &c[0]);
+    list_show(array);
+    list_insert(array, &c[1]);
+    list_show(array);
+    list_delete(array, &c[0]);
+    list_show(array);
 
     return 0;
 }
