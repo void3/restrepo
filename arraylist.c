@@ -10,19 +10,20 @@
 #define ELEM_MAX 10
 
 typedef struct elem {
+  int  number;
   char *member;
 } elem_t;
 
 /* append elem to head list */
-int list_insert(elem_t *list[], char *elem)
+int list_insert(elem_t *list, char *elem)
 {
   int i;
   
   LOGFUNC();
   
   for (i = 0; i < ELEM_MAX; i++) {
-    if (list[i] == NULL) {
-      list[i] = elem;
+    if (list[i].member == NULL) {
+      list[i].member = elem;
       return 1;
 	}
   }
@@ -31,19 +32,20 @@ int list_insert(elem_t *list[], char *elem)
 }
 
 /* remove elem from head list */
-int list_delete(elem_t *list[], char *elem)
+int list_delete(elem_t *list, char *elem)
 {
   int i, j;
 
   LOGFUNC();
   
   for (i = 0; i < ELEM_MAX; i++) {
-  printf("%d comparing(%p,%p)\n", i, list[i], elem);
-    if (list[i] == elem) { /* found elem */
+  printf("list = %p\n", list);
+  printf("%d comparing(%p,%p)\n", i, list[i].member, elem);
+    if (list[i].member == elem) { /* found elem */
       for (j = i; j < ELEM_MAX-1; j++) { /* shift left elem */ 
-        list[j] = list[j+1];
+        list[j].member = list[j+1].member;
       }
-      list[j] = NULL;
+      list[j].member = NULL;
       printf("move end\n");
       return 1;
 	}
@@ -53,15 +55,15 @@ int list_delete(elem_t *list[], char *elem)
 }
 
 /* show list */
-void list_show(elem_t *list[])
+void list_show(elem_t *list)
 {
 	int i;
 
   LOGFUNC();
-  for (i = 0; i < ELEM_MAX && list[i] != NULL; i++) {
+  for (i = 0; i < ELEM_MAX && list[i].member != NULL; i++) {
       printf("(%d)", i);
       printf("(%p)", list[i]);
-      if (list[i] != NULL) printf("%c ", list[i]->member);
+      if (list[i].member != NULL) printf("%c ", *(list[i].member));
 	}
   printf("end");
 }
