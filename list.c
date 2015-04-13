@@ -75,7 +75,7 @@ int main()
 	list_t a, b, c;
 
     head.next = NULL;
-    head.member = 0;
+    head.member = 0;     /* head member is dummy */
     list_show(&head);
     a.member=1; a.next=NULL;list_insert(&head, &a);
     list_show(&head);
@@ -87,7 +87,17 @@ int main()
     list_show(&head);
     list_delete(&head, &c);
     list_show(&head);
-    
+    list_delete(&head, &c);
+    list_show(&head);
+    list_delete(&head, &b);
+    list_show(&head);
+    list_insert(&head, &c);
+    list_insert(&head, &b);
+    list_insert(&head, &a);
+    list_show(&head);
+    list_delete(&head, &c);
+    list_delete(&head, &b);
+    list_delete(&head, &a);
     return 0;
 }
 

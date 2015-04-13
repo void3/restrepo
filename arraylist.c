@@ -9,10 +9,7 @@
 
 #define ELEM_MAX 10
 
-typedef struct elem {
-  int  number;
-  char *member;
-} elem_t;
+#include "arraylist.h"
 
 /* append elem to head list */
 int list_insert(elem_t *list, char *elem)
@@ -39,8 +36,6 @@ int list_delete(elem_t *list, char *elem)
   LOGFUNC();
   
   for (i = 0; i < ELEM_MAX; i++) {
-  printf("list = %p\n", list);
-  printf("%d comparing(%p,%p)\n", i, list[i].member, elem);
     if (list[i].member == elem) { /* found elem */
       for (j = i; j < ELEM_MAX-1; j++) { /* shift left elem */ 
         list[j].member = list[j+1].member;
@@ -69,6 +64,7 @@ void list_show(elem_t *list)
   printf("\n");
 }
 
+#if 0
 int main()
 {
 	elem_t array[ELEM_MAX];
@@ -92,3 +88,4 @@ int main()
     return 0;
 }
 
+#endif

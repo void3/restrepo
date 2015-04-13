@@ -2,6 +2,7 @@
 #include <stdlib.h>
 
 #include "machine.h"
+#include "arraylist.h"
 
 #ifdef DEBUG
 #define LOGFUNC() printf("%s(File %s Line %d):", __func__, __FILE__, __LINE__)
@@ -92,8 +93,7 @@ int gen_destroy(myobj_t *myobjp)
 /*
  * type に従って、オブジェクトにインプットする
  *
- * IN  int    type
- * IN  void * handle
+ * IN  void * objp
  * IN  int    in
  */
 int gen_in(myobj_t *myobjp, int in)
@@ -122,6 +122,8 @@ int gen_in(myobj_t *myobjp, int in)
 int main()
 {
   myobj_t myobj[2];
+  elem_t  elema[10]; /* XXX MAGIC NUMBER XXX */
+  myobj_t *p;
 
   int i, j;
 
@@ -138,16 +140,31 @@ int main()
 	}
   }
 
+  /* elem array */
+  for (i = 0; i < 10; i++) elema[i].member = NULL;
+  
+  list_insert(elema, (char *)&myobj[0]);
+  list_insert(elema, (char *)&myobj[1]);
+  
+  printf("elema->member[%p %p], myobj[%p %p]\n", elema[0].member, elema[1].member,
+                                                 &myobj[0], &myobj[1]);
+
   for (i = 0; i < 10; i++) { /* left */
     printf("%d:", i);
-    for (j = 0; j < 2; j++) {
-      gen_in(&myobj[j], 0);
+
+    if (i == 5) list_delete(elema, (char *)&myobj[0]);
+    if (i == 7) list_insert(elema, (char *)&myobj[0]);
+      
+    for (j = 0; j < 10; j++) {
+      if (elema[j].member) {
+        gen_in((myobj_t *)elema[j].member, 0);
+      }
 	}
     printf("\n");
   }
 
   for (j = 0; j < 2; j++) {
-	gen_destroy(&myobj[j]);
+	gen_destroy((myobj_t *)elema[j].member);
   }
 
   return 0;
